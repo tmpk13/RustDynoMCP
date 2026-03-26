@@ -1,0 +1,56 @@
+[board]
+name   = "Raspberry Pi Pico (RP2040)"
+chip   = "RP2040"
+target = "thumbv6m-none-eabi"
+
+[tool]
+name  = "probe-rs"
+check = "probe-rs --version"
+
+[probe]
+protocol = "swd"
+speed    = 4000
+
+[flash]
+restore_unwritten = false
+halt_afterwards   = false
+
+[rtt]
+enabled  = true
+channels = [{ up = 0, name = "Terminal" }]
+
+[new_project]
+runner = "probe-rs run --chip RP2040 --protocol swd"
+
+[new_project.dependencies]
+cortex-m    = { version = "0.7.7", features = ["inline-asm"] }
+cortex-m-rt = "0.7.5"
+rp2040-hal  = { version = "0.10", features = ["rt"] }
+
+[[new_project.files]]
+path              = "rustdyno.toml"
+replace_if_exists = true
+content = """
+default="rpi-pico.toml"
+"""
+
+[[new_project.files]]
+path    = "src/main.rs"
+content = """
+#![no_std]
+#![no_main]
+use cortex_m_rt::entry;
+#[entry]
+fn main() -> ! { loop {} }
+"""
+
+[[new_project.files]]
+path              = ".cargo/config.toml"
+replace_if_exists = true
+content = """
+[target.thumbv6m-none-eabi]
+runner = \"probe-rs run --chip RP2040 --protocol {{PROTOCOL}}\"
+
+[build]
+target = \"thumbv6m-none-eabi\"
+"""

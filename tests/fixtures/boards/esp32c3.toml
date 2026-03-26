@@ -1,0 +1,49 @@
+[board]
+name   = "ESP32-C3 (ESP-IDF)"
+chip   = "esp32c3"
+target = "riscv32imc-esp-espidf"
+
+[tool]
+name  = "espflash"
+check = "espflash --version"
+
+[run]
+command = "cargo run --release"
+
+[rtt]
+enabled  = true
+command  = "espflash monitor"
+channels = [{ up = 0, name = "Terminal" }]
+
+[new_project]
+runner = "espflash flash --monitor"
+
+[[new_project.generate]]
+label   = "cargo generate (esp-idf-template)"
+command = "cargo generate esp-rs/esp-idf-template cargo --name {{PROJECT_NAME}}"
+
+[[new_project.generate]]
+label   = "esp-generate"
+command = "esp-generate --chip esp32c3 {{PROJECT_NAME}}"
+
+[new_project.dependencies]
+anyhow      = "1"
+esp-idf-hal = "0.46"
+
+[new_project.build-dependencies]
+embuild = "0.33"
+
+[[new_project.files]]
+path              = "rustdyno.toml"
+replace_if_exists = true
+content = """
+default="esp32c3.toml"
+"""
+
+[[new_project.files]]
+path    = "src/main.rs"
+content = """
+fn main() {
+    println!(\"Hello from ESP32-C3!\");
+}
+"""

@@ -1,0 +1,43 @@
+[board]
+name   = "BBC micro:bit v2"
+chip   = "nRF52833_xxAA"
+target = "thumbv7em-none-eabihf"
+elf    = "<CRATE_NAME>"
+
+[probe]
+protocol = "swd"
+speed    = 4000
+
+[flash]
+restore_unwritten = false
+halt_afterwards   = false
+
+[rtt]
+enabled  = true
+channels = [{ up = 0, name = "Terminal" }]
+
+[new_project]
+runner = "probe-rs run --chip nRF52833_xxAA --protocol swd"
+
+dependencies = """
+cortex-m    = { version = "0.7", features = ["inline-asm"] }
+microbit-v2 = "0.16"
+rtt-target  = "0.6"
+"""
+
+[[new_project.files]]
+path              = "rustdyno.toml"
+replace_if_exists = true
+content = """
+default="microbit-v2.toml"
+"""
+
+[[new_project.files]]
+path    = "src/main.rs"
+content = """
+#![no_main]
+#![no_std]
+use cortex_m_rt::entry;
+#[entry]
+fn main() -> ! { loop {} }
+"""
